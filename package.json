@@ -1,0 +1,8 @@
+{
+  "name": "mision-schema-migration",
+  "version": "1.0.0",
+  "description": "Migrates a MySQL database to MongoDB",
+  "main": "index.js",
+  "author": "Lisandro Corbalan",
+  "license": "MIT"
+}
