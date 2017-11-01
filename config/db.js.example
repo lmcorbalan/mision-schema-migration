@@ -1,0 +1,11 @@
+module.exports = {
+  mysql:{
+    host: 'localhost',
+    user: 'admin',
+    password: 'admin',
+    database: 'database_name'
+  },
+  mongo: {
+
+  }
+};
