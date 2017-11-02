@@ -1,13 +1,13 @@
 module.exports = async (mysql, mongoDB) => {
   const mongoCategories = mongoDB.collection('categories');
 
-  const categoriesLookup = {};
   const results = await mysql.query('select * from categorias');
 
-  for (let row of results) {
-    categoria = Object.assign({}, row)
-    categoriesLookup[categoria.id] = categoria;
-  }
+  const categoriesLookup = results.reduce((lookup, item) => {
+    const cat = {...item}
+    lookup[cat.id] = cat;
+    return lookup;
+  }, {});
 
   for (let id of Object.keys(categoriesLookup)) {
     const child = categoriesLookup[id];

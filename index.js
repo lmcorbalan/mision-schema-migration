@@ -8,9 +8,8 @@ const start = async () => {
 
   await mongoDB.dropDatabase();
 
-  // let migrate = require('./migrations/categorias');
   try {
-    for (let migration of ['categorias']) {
+    for (let migration of ['categorias', 'simples']) {
       let migrate = require(`./migrations/${migration}`);
       await migrate(connectMySQL, mongoDB);
     }
