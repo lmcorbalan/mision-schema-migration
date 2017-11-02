@@ -6,16 +6,21 @@ const start = async () => {
   const connectMySQL = await mysql.createConnection(config.mysql);
   const mongoDB = await connectMongo();
 
-  let migrate = require('./migrations/categorias');
-  await migrate(connectMySQL, mongoDB);
+  await mongoDB.dropDatabase();
 
-  // ['categorias'].forEach(async (migration) => {
-  //   let migrate = require(`./migrations/${migration}`);
-  //   await migrate(connectMySQL, mongoDB);
-  // })
-
-  mongoDB.close();
-  connectMySQL.end();
+  // let migrate = require('./migrations/categorias');
+  try {
+    for (let migration of ['categorias']) {
+      let migrate = require(`./migrations/${migration}`);
+      await migrate(connectMySQL, mongoDB);
+    }
+  } catch (e) {
+    console.log(e);
+    throw e;
+  } finally {
+    mongoDB.close();
+    connectMySQL.end();
+  }
 };
 
 start();
