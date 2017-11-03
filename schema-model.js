@@ -13,6 +13,18 @@ statuses {
   updated_at
 }
 
+warehouses {
+  id
+  name
+  description
+  address
+  telephone
+  working_hours
+  attendant
+  created_at
+  updated_at
+}
+
 user {
   id
   type
@@ -105,22 +117,10 @@ accounts {
   updated_at
 }
 
-warehouses {
-  id
-  name
-  description
-  address
-  telephone
-  working_hours
-  attendant
-  created_at
-  updated_at
-}
-
 // tokens de las redes sociales
 identities {
   id
-  user_id
+  user_id --> User._id
   provider
   uid
   token
@@ -137,15 +137,6 @@ identities {
   updated_at
 }
 
-media {
-  id
-  owner_id --> que relaciona?
-  file
-  resource_type
-  status
-  created_at
-  updated_at
-}
 -------------
 purchases {
   id
@@ -193,6 +184,7 @@ circles {
   created_at
   updated_at
 }
+
 -------------
 categories {
   id
@@ -232,6 +224,7 @@ productos {
   created_at
   updated_at
 }
+
 -------------
 pedidos {
   id
@@ -301,6 +294,17 @@ transaction_details {
   updated_at
 }
 -------------
+
+// vacia
+media {
+  id
+  owner_id --> model polimorfico
+  file
+  resource_type
+  status
+  created_at
+  updated_at
+}
 
 delivery_statuses {
   id
