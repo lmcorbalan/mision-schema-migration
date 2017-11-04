@@ -9,9 +9,9 @@ const start = async () => {
   await mongoDB.dropDatabase();
 
   try {
-    for (let migration of ['categorias', 'porducts','users', 'suppliers', 'simples']) {
-      let migrate = require(`./migrations/${migration}`);
-      await migrate(connectMySQL, mongoDB);
+    const migrations = require('./migrations');
+    for (let migration of migrations) {
+      await migration(connectMySQL, mongoDB);
     }
   } catch (e) {
     console.log(e);

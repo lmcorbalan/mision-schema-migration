@@ -225,7 +225,8 @@ productos {
   updated_at
 }
 
--------------
+--------------
+--------------
 pedidos {
   id
   lines --> se reemplaza con pedidos_details

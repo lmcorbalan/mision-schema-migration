@@ -1,4 +1,7 @@
 module.exports = async (mysql, mongoDB) => {
+  console.log('=============Migrating Categories=============')
+  console.time('accountsCategories');
+
   const mongoCategories = mongoDB.collection('categories');
 
   const results = await mysql.query('select * from categorias');
@@ -13,9 +16,11 @@ module.exports = async (mysql, mongoDB) => {
     const child = categoriesLookup[id];
     if (child.parent_id) {
       const parent = categoriesLookup[child.parent_id];
-      const parentChildren = parent.children || [];
-      const children = [...parentChildren, child.id];
-      parent.children = children;
+      if (parent) {
+        const parentChildren = parent.children || [];
+        const children = [...parentChildren, child.id];
+        parent.children = children;
+      }
     }
   }
 
@@ -23,7 +28,9 @@ module.exports = async (mysql, mongoDB) => {
     return [...cats, categoriesLookup[id]];
   }, []);
 
-  const allIds = await mongoCategories.insertMany(categories);
+  if (categories.length) {
+    const allIds = await mongoCategories.insertMany(categories);
+  }
   const allCategories = await mongoCategories.find().toArray();
   for (let category of allCategories) {
     let update = false;
@@ -33,8 +40,10 @@ module.exports = async (mysql, mongoDB) => {
       const parent = await mongoCategories.findOne({
         id: category.parent_id
       }, {_id: 1});
-      category.parent_id = parent._id;
 
+      if (parent) {
+        category.parent_id = parent._id;
+      }
     }
 
     if (category.children && category.children.length) {
@@ -54,4 +63,6 @@ module.exports = async (mysql, mongoDB) => {
       await mongoCategories.updateOne({_id: category._id}, category);
     }
   }
+
+  console.timeEnd('accountsCategories');
 };
