@@ -1,8 +1,8 @@
 module.exports = [
-  'categories',
-  'products',
   'users',
   'suppliers',
+  'categories',
+  'products',
   'accounts',
   'identities',
   'purchases',

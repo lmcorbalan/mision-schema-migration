@@ -30,7 +30,7 @@ module.exports = async (mysql, mongoDB) => {
         description: item.description,
         logo: item.logo,
         video: item.video,
-        active: item.active,
+        active: Boolean(item.active),
         operationType: item.operation_type,
         ivaCondition: item.iva_condition,
         identityType: item.identity_type,

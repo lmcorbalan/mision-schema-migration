@@ -2,11 +2,34 @@ module.exports = async (mysql, mongoDB) => {
   console.log('=============Migrating Products=============')
   console.time('accountsProducts');
 
-  const mongoCategories = mongoDB.collection('categories');
   const mongoProducts = mongoDB.collection('products');
+  const mongoCategories = mongoDB.collection('categories');
+  const mongoSuppliers = mongoDB.collection('suppliers');
+
+  let [categories, suppliers] = await Promise.all([
+    mongoCategories.find().toArray(),
+    mongoSuppliers.find().toArray(),
+    require('./circlesPurchases')(mysql, mongoDB)
+  ]);
+
+  let categoriesLookup = categories
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
+
+  let suppliersLookup = suppliers
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
 
   const products = (await mysql.query('SELECT * FROM productos'))
     .reduce((products, item) => {
+      const supplier = item.supplier_id && suppliersLookup[item.supplier_id]
+        ? suppliersLookup[item.supplier_id]._id
+        : null;
+
       const product = {
         id: item.id,
         price: item.precio,
@@ -16,13 +39,13 @@ module.exports = async (mysql, mongoDB) => {
         allowedAmount: item.cantidad_permitida,
         image: item.imagen,
         marketPrice: item.precio_super,
-        supplier: item.supplier_id,
+        supplier: supplier,
         code: item.codigo,
-        hidden: item.oculto,
+        hidden: Boolean(item.oculto),
         saleType: item.sale_type,
         order: item.orden,
-        highlight: item.highlight,
-        outOfStock: item.faltante,
+        highlight: Boolean(item.highlight),
+        outOfStock: Boolean(item.faltante),
         pack: item.pack,
         stock: item.stock,
         orden_remito: item.orden_remito,
@@ -40,15 +63,9 @@ module.exports = async (mysql, mongoDB) => {
     const allIds = await mongoProducts.insertMany(products);
   }
 
-  const categoriesLookup = (await mongoCategories.find().toArray())
+  let productsLookup = (await mongoProducts.find().toArray())
     .reduce((lookup, item) => {
-      lookup[item.id] = item
-      return lookup;
-    }, {});
-
-  const productsLookup = (await mongoProducts.find().toArray())
-    .reduce((lookup, item) => {
-      lookup[item.id] = item
+      lookup[item.id] = item;
       return lookup;
     }, {});
 
