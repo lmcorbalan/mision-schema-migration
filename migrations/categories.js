@@ -4,64 +4,51 @@ module.exports = async (mysql, mongoDB) => {
 
   const mongoCategories = mongoDB.collection('categories');
 
-  const results = await mysql.query('select * from categorias');
+  const categories = await mysql.query('select * from categorias')
+    .reduce((categories, item) => {
+      const cat = {
+        id: item.id,
+        name: item.nombre,
+        description: item.descripcion,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+      };
 
-  const categoriesLookup = results.reduce((lookup, item) => {
-    const cat = {...item}
-    lookup[cat.id] = cat;
-    return lookup;
-  }, {});
+      if (item.parent_id) {
+        cat.parent = item.parent_id;
+      }
+
+      return [...categories, cat];
+    }, []);
+
+  if (categories.length) {
+    await mongoCategories.insertMany(categories);
+  }
+
+  const categoriesLookup = (await mongoCategories.find().toArray())
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
 
   for (let id of Object.keys(categoriesLookup)) {
     const child = categoriesLookup[id];
-    if (child.parent_id) {
-      const parent = categoriesLookup[child.parent_id];
+
+    if (child.parent) {
+      const parent = categoriesLookup[child.parent];
       if (parent) {
-        const parentChildren = parent.children || [];
-        const children = [...parentChildren, child.id];
-        parent.children = children;
+        parent.children = parent.children || [];
+        parent.children = [...parent.children, child._id];
+        child.parent = parent._id;
+      } else {
+        delete child.parent;
       }
     }
   }
 
-  const categories = Object.keys(categoriesLookup).reduce((cats, id) => {
-    return [...cats, categoriesLookup[id]];
-  }, []);
-
-  if (categories.length) {
-    const allIds = await mongoCategories.insertMany(categories);
-  }
-  const allCategories = await mongoCategories.find().toArray();
-  for (let category of allCategories) {
-    let update = false;
-
-    if (category.parent_id) {
-      update = true;
-      const parent = await mongoCategories.findOne({
-        id: category.parent_id
-      }, {_id: 1});
-
-      if (parent) {
-        category.parent_id = parent._id;
-      }
-    }
-
-    if (category.children && category.children.length) {
-      update = true;
-      const children = await mongoCategories.find({
-        id: {
-          $in: category.children
-        }
-      }, {_id: 1}).toArray();
-
-      category.children = children.reduce((children, item) => (
-        children.concat(item._id)
-      ),[]);
-    }
-
-    if (update) {
-      await mongoCategories.updateOne({_id: category._id}, category);
-    }
+  for (let id of Object.keys(categoriesLookup)) {
+    const cat = categoriesLookup[id];
+    mongoCategories.updateOne({_id: cat._id}, cat);
   }
 
   console.timeEnd('accountsCategories');

@@ -11,12 +11,17 @@ module.exports = async (mysql, mongoDB, orderId) => {
     mongoProducts.find().toArray()
   ]);
 
-
   let suppliersLookup = suppliers
-    .reduce((lookup, item) => (lookup[item.id] = item), {});
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
 
   let productsLookup = products
-    .reduce((lookup, item) => (lookup[item.id] = item), {});
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
 
   const count = await mysql.query('SELECT count(*) as count FROM pedidos_details');
   const pages = Math.ceil(count[0].count/100000);

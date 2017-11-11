@@ -6,7 +6,10 @@ module.exports = async (mysql, mongoDB) => {
   const mongoUsers = mongoDB.collection('users');
 
   const usersLookup = (await mongoUsers.find().toArray())
-    .reduce((lookup, item) => (lookup[item.id] = item), {});
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
 
   const identities = (await mysql.query('SELECT * FROM identities'))
     .reduce((identities, item) => {

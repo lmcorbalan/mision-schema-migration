@@ -12,11 +12,20 @@ module.exports = async (mysql, mongoDB) => {
   ]);
 
   let usersLookup = users
-      .reduce((lookup, item) => (lookup[item.id] = item), {});
+      .reduce((lookup, item) => {
+        lookup[item.id] = item;
+        return lookup;
+      }, {});
   let purchasesLookup = purchases
-      .reduce((lookup, item) => (lookup[item.id] = item), {});
+      .reduce((lookup, item) => {
+        lookup[item.id] = item;
+        return lookup;
+      }, {});
   let warehousesLookup = warehouses
-      .reduce((lookup, item) => (lookup[item.id] = item), {});
+      .reduce((lookup, item) => {
+        lookup[item.id] = item;
+        return lookup;
+      }, {});
 
   const circlesPurchases = (await mysql.query('SELECT * FROM circulos_compras'))
     .reduce((lookup, item) => {

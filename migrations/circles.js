@@ -11,7 +11,10 @@ module.exports = async (mysql, mongoDB) => {
   ]);
 
   let usersLookup = users
-    .reduce((lookup, item) => (lookup[item.id] = item), {});
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
 
   const circles = (await mysql.query('SELECT * FROM circulos'))
     .reduce((circles, item) => {
