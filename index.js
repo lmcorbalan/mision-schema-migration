@@ -1,3 +1,5 @@
+console.time('totalTime');
+
 const config = require('./config/db');
 const mysql = require('promise-mysql');;
 const connectMongo = require('./mongo-connector');
@@ -20,6 +22,8 @@ const start = async () => {
     mongoDB.close();
     connectMySQL.end();
   }
+  
+  console.timeEnd('totalTime');
 };
 
 start();

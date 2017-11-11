@@ -10,5 +10,6 @@ module.exports = [
   'statuses',
   'warehouses',
   'circles',
+  'ordersLines',
   'orders'
 ].map(name => require(`./${name}`));

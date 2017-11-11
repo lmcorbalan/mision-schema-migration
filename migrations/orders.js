@@ -2,32 +2,46 @@ module.exports = async (mysql, mongoDB) => {
   console.log('=============Migrating Orders=============')
   console.time('accountsOrders');
 
-  const mongoOrders = mongoDB.collection('orders');
-  const mongoUsers = mongoDB.collection('users');
-  const mongoCircles = mongoDB.collection('circles');
-  const mongoPurchases = mongoDB.collection('purchases');
+  let mongoOrders = mongoDB.collection('orders');
+  let mongoUsers = mongoDB.collection('users');
+  let mongoCircles = mongoDB.collection('circles');
+  let mongoPurchases = mongoDB.collection('purchases');
 
-  let [users, circles, purchases, ordersLines] = await Promise.all([
+  let [users, circles, purchases, products] = await Promise.all([
     mongoUsers.find().toArray(),
     mongoCircles.find().toArray(),
     mongoPurchases.find().toArray(),
-    (require('./ordersLines')(mysql, mongoDB)
   ]);
 
   let usersLookup = users
-    .reduce((lookup, item) => (lookup[item.id] = item), {});
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
+
   let circlesLookup = circles
-    .reduce((lookup, item) => (lookup[item.id] = item), {});
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
+
   let purchasesLookup = purchases
-    .reduce((lookup, item) => (lookup[item.id] = item), {});
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
 
-  const orders = (await mysql.query('SELECT * FROM pedidos'))
-    .reduce((orders, item) => {
-      let lines = [];
-      if (ordersLines[item.id]) {
-        lines = ordersLines[item.id];
-      }
+  const count = await mysql.query('SELECT count(*) as count FROM pedidos');
+  const pageSize = 1000;
+  const pages = Math.ceil(count[0].count/pageSize);
 
+  for (let i = 0; i < pages; i++) {
+    let orderBatch = [];
+    let offset = i * pageSize;
+
+    const orders = (await mysql.query(`SELECT * FROM pedidos limit ${pageSize} offset ${offset}`));
+
+    for (let item of orders) {
       let user = null;
       if (item.usuario_id && usersLookup[item.usuario_id]) {
         user = usersLookup[item.usuario_id]._id;
@@ -38,14 +52,13 @@ module.exports = async (mysql, mongoDB) => {
         circle = circlesLookup[item.circulo_id]._id;
       }
 
-      let purchases = null;
+      let purchase = null;
       if (item.compra_id && purchasesLookup[item.compra_id]) {
-        purchases = purchasesLookup[item.compra_id]._id;
+        purchase = purchasesLookup[item.compra_id]._id;
       }
 
-      const order = {
+      orderBatch.push({
         id: item.id,
-        lines: lines,
         user: user,
         circle: circle,
         purchase: purchase,
@@ -58,13 +71,12 @@ module.exports = async (mysql, mongoDB) => {
         saving: item.saving,
         createdAt: item.created_at,
         updatedAt: item.updated_at
-      };
+      });
+    };
 
-      return [...orders, order];
-    }, []);
-
-  if (orders.length) {
-    await mongoOrders.insertMany(orders);
+    if (orderBatch.length) {
+      await mongoOrders.insertMany(orderBatch);
+    }
   }
 
   console.timeEnd('accountsOrders');
