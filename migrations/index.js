@@ -1,14 +1,14 @@
 module.exports = [
   'users',
-  'suppliers',
-  'categories',
-  'products',
+  'suppliers', // ready
+  'categories', // ready
+  'products', // ready
   'accounts',
-  'identities',
-  'purchases',
-  'sectors',
-  'statuses',
-  'warehouses',
+  'identities', // EMPTY
+  'purchases',  // ready
+  'sectors',  // ready
+  'statuses',  // ready
+  'warehouses',  // EMPTY
   'circles',
   'ordersLines',
   'orders'

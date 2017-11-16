@@ -3,9 +3,20 @@ module.exports = async (mysql, mongoDB) => {
   console.time('accountsUsers');
 
   const mongoUsers = mongoDB.collection('users');
+  const mongoCircles = mongoDB.collection('circles');
+
+  let circlesLookup = (await mongoCircles.find().toArray())
+    .reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
 
   const users = (await mysql.query('SELECT * FROM usuarios'))
     .reduce((users, item) => {
+      const circle = item.circulo_id && circlesLookup[item.circulo_id]
+        ? circlesLookup[item.circulo_id]._id
+        : null;
+
       const user = {
         id: item.id,
         type: item.type,
@@ -24,7 +35,7 @@ module.exports = async (mysql, mongoDB) => {
           celphone: item.cel1
         },
         email: item.email,
-        circleId: item.circulo_id,
+        circle: circle,
         nameIva: item.nombre_iva,
         zone: item.zona,
         login: {
