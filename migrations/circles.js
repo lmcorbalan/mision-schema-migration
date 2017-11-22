@@ -20,7 +20,7 @@ module.exports = async (mysql, mongoDB) => {
     .reduce((circles, item) => {
       let coordinator = null;
       if (item.coordinador_id && usersLookup[item.coordinador_id]) {
-        coordinator = usersLookup[item.coordinador_id];
+        coordinator = usersLookup[item.coordinador_id]._id;
       }
 
       const circle = {

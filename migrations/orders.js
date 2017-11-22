@@ -58,7 +58,7 @@ module.exports = async (mysql, mongoDB) => {
       }
 
       orderBatch.push({
-        id: item.id,
+        oldId: item.id,
         user: user,
         circle: circle,
         purchase: purchase,

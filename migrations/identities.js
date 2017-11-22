@@ -31,7 +31,7 @@ module.exports = async (mysql, mongoDB) => {
         image: item.image,
         phone: item.phone,
         urls: item.urls,
-        expires_at: item.expires_at,
+        expiresAt: item.expires_at,
         createdAt: item.created_at,
         updatedAt: item.updated_at
       };

@@ -1,15 +1,15 @@
 module.exports = [
-  'users',
+  'users', // ready
   'suppliers', // ready
   'categories', // ready
   'products', // ready
-  'accounts',
+  'accounts', // ready
   'identities', // EMPTY
   'purchases',  // ready
   'sectors',  // ready
   'statuses',  // ready
   'warehouses',  // EMPTY
-  'circles',
-  'ordersLines',
+  'circles',  // ready
+  'ordersLines', // ready
   'orders'
 ].map(name => require(`./${name}`));

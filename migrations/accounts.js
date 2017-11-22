@@ -16,7 +16,7 @@ module.exports = async (mysql, mongoDB) => {
       const account = {
         id: item.id,
         user: (item.usuario_id && usersLookup[item.usuario_id]) ? usersLookup[item.usuario_id]._id : null,
-        status: item.status,
+        status: Boolean(item.status),
         balance: item.balance,
         createdAt: item.created_at,
         updatedAt: item.updated_at
